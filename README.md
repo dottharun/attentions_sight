@@ -4,7 +4,6 @@
 # installed packages
 - fastapi
 - streamlit
-- httpx
 - uvicorn
 
 
