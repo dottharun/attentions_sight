@@ -25,7 +25,8 @@ async def lifespan(_: FastAPI):
 
 
 # Create a FastAPI instance
-app = FastAPI(lifespan=lifespan)
+# app = FastAPI(lifespan=lifespan)
+app = FastAPI()
 
 
 # Route to fetch arXiv results dynamically
