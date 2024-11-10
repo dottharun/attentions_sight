@@ -1,12 +1,21 @@
 import streamlit as st
 from datetime import datetime
+from enum import Enum
+
+
+class AgentMode(Enum):
+    AUTO_AGENT = "Auto Agent"
+    WEB_SEARCH = "Web Search"
+    DB_QUERY = "DB Query"
+    QA_MODE = "QA Mode"
+    FUTURE_ANALYSIS = "Future works/analysis"
 
 
 def initialize_session_state():
     if "messages" not in st.session_state:
         st.session_state.messages = []
     if "mode" not in st.session_state:
-        st.session_state.mode = "Auto Agent"
+        st.session_state.mode = AgentMode.WEB_SEARCH
 
 
 def get_current_mode_response(prompt):
@@ -14,11 +23,11 @@ def get_current_mode_response(prompt):
     Simulate different mode responses - replace with actual implementations
     """
     modes = {
-        "Auto Agent": "Auto Agent: " + prompt,
-        "QA Mode": "Q&A Agent:: " + prompt,
-        "Web Search": "Search Agent: " + prompt,
-        "DB Query": "Database Agent: " + prompt,
-        "Future works/analysis": "Future works Agent: " + prompt,
+        AgentMode.AUTO_AGENT: f"Auto Agent: {prompt}",
+        AgentMode.QA_MODE: f"Q&A Agent:: {prompt}",
+        AgentMode.WEB_SEARCH: f"Search Agent: {prompt}",
+        AgentMode.DB_QUERY: f"Database Agent: {prompt}",
+        AgentMode.FUTURE_ANALYSIS: f"Future works Agent: {prompt}",
     }
     return modes[st.session_state.mode]
 
@@ -29,7 +38,7 @@ def display_chat_history():
             st.markdown(message["content"])
             if "metadata" in message:
                 st.caption(
-                    f"Mode: {message['metadata']['mode']} | Time: {message['metadata']['timestamp']}"
+                    f"Mode: {message['metadata']['mode'].value} | Time: {message['metadata']['timestamp']}"
                 )
 
 
@@ -48,7 +57,7 @@ def handle_user_input():
         # Display user message
         with st.chat_message("user"):
             st.markdown(prompt)
-            st.caption(f"Mode: {st.session_state.mode} | Time: {timestamp}")
+            st.caption(f"Mode: {st.session_state.mode.value} | Time: {timestamp}")
 
         # Get response based on current mode
         response = get_current_mode_response(prompt)
@@ -65,7 +74,7 @@ def handle_user_input():
         # Display assistant response
         with st.chat_message("assistant"):
             st.markdown(response)
-            st.caption(f"Mode: {st.session_state.mode} | Time: {timestamp}")
+            st.caption(f"Mode: {st.session_state.mode.value} | Time: {timestamp}")
 
 
 def create_sidebar():
@@ -74,14 +83,10 @@ def create_sidebar():
 
         # Mode Selection
         st.session_state.mode = st.radio(
-            "Select Chat Mode",
-            [
-                "Auto Agent",
-                "Web Search",
-                "DB Query",
-                "QA Mode",
-                "Future works/analysis",
-            ],
+            label="Select Chat Mode",
+            options=list(AgentMode),
+            index=1,  # to self the default agent mode
+            format_func=lambda mode: mode.value,
             help="Choose the type of interaction you want",
         )
 
@@ -116,7 +121,7 @@ def main():
     create_sidebar()
 
     # Display current mode
-    st.markdown(f"**Current Mode**: {st.session_state.mode}")
+    st.markdown(f"**Current Mode**: {st.session_state.mode.value}")
 
     # Display chat history
     display_chat_history()
