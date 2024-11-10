@@ -5,6 +5,7 @@ from typing import List
 async def query_arxiv(query: str, max_results: int = 5) -> List[arxiv.Result]:
     """
     Query arXiv for papers using the arxiv package.
+    From - https://github.com/lukasschwab/arxiv.py?tab=readme-ov-file#fetching-results
 
     Args:
         query (str): Search query string
