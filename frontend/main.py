@@ -48,7 +48,7 @@ def make_agent_api_call(mode: AgentMode, prompt: str) -> Union[List[dict], str]:
             timeout=30,  # Timeout after 30 seconds
         )
         response.raise_for_status()
-        print("hello from response in st", response.json())
+        # print("hello from response in st", response.json())
         return response.json()
     except requests.exceptions.RequestException as e:
         st.session_state.api_error = f"API Error: {str(e)}"

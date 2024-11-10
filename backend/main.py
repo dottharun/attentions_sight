@@ -1,13 +1,8 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from contextlib import asynccontextmanager
-from agents.search_agent import query_arxiv
-import logging
-
-
-# Set up logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+from agents.search_agent import query_arxiv, llm_make_arxiv_query
+from util.log import logger
 
 
 async def startup_event():
@@ -49,29 +44,6 @@ async def get_arxiv_results(query: str, max_results: int = 5):
 class SearchRequest(BaseModel):
     prompt: str
     max_results: int = 2
-
-
-async def llm_make_arxiv_query(prompt: str) -> str:
-    """
-    Convert user prompt into an optimized arXiv search query using LLM.
-    Add your LLM integration here.
-    """
-    try:
-        # This is a placeholder - replace with actual LLM call
-        # You would typically:
-        # 1. Call your LLM with a prompt like:
-        # "Convert this user question into a focused arXiv search query: {}"
-        # 2. Process the response to extract key search terms
-
-        # For now, we'll just use basic keyword extraction
-        keywords = prompt.lower().split()
-        cleaned_keywords = [word for word in keywords if len(word) > 3]
-        query = " AND ".join(cleaned_keywords[:3])  # Use top 3 keywords
-
-        return query
-    except Exception as e:
-        logger.error(f"Error in LLM query generation: {str(e)}")
-        raise HTTPException(status_code=500, detail="Failed to generate search query")
 
 
 @app.post("/api/web-search")
