@@ -1,19 +1,6 @@
-from typing import List, Union
 import streamlit as st
 from datetime import datetime
-from enum import Enum
-import requests
-
-# Define the base URL for your FastAPI backend
-API_BASE_URL = "http://localhost:8000"  # Adjust this to match your FastAPI server
-
-
-class AgentMode(Enum):
-    AUTO_AGENT = "Auto Agent"
-    WEB_SEARCH = "Web Search"
-    DB_QUERY = "DB Query"
-    QA_MODE = "QA Mode"
-    FUTURE_ANALYSIS = "Future works/analysis"
+from api import AgentMode, make_agent_api_call
 
 
 def initialize_session_state():
@@ -23,36 +10,6 @@ def initialize_session_state():
         st.session_state.mode = AgentMode.WEB_SEARCH
     if "api_error" not in st.session_state:
         st.session_state.api_error = None
-
-
-def make_agent_api_call(mode: AgentMode, prompt: str) -> Union[List[dict], str]:
-    """
-    Make API calls to different endpoints based on the selected mode
-    """
-    # Define endpoints for each mode
-    endpoints = {
-        AgentMode.AUTO_AGENT: "/api/auto-agent",
-        AgentMode.WEB_SEARCH: "/api/web-search",
-        AgentMode.DB_QUERY: "/api/db-query",
-        AgentMode.QA_MODE: "/api/qa",
-        AgentMode.FUTURE_ANALYSIS: "/api/future-analysis",
-    }
-
-    endpoint = endpoints[mode]
-
-    try:
-        response = requests.post(
-            f"{API_BASE_URL}{endpoint}",
-            json={"prompt": prompt, "max_results": 5},
-            headers={"Content-Type": "application/json"},
-            timeout=30,  # Timeout after 30 seconds
-        )
-        response.raise_for_status()
-        # print("hello from response in st", response.json())
-        return response.json()
-    except requests.exceptions.RequestException as e:
-        st.session_state.api_error = f"API Error: {str(e)}"
-        return f"Error processing request. Please try again later. ({str(e)})"
 
 
 def display_chat_history():
@@ -70,38 +27,6 @@ def display_chat_history():
                 st.caption(
                     f"Mode: {message['metadata']['mode'].value} | Time: {message['metadata']['timestamp']}"
                 )
-
-
-def format_arxiv_results(results: List[dict]) -> str:
-    """
-    Format arxiv results into a nice markdown list with expandable details
-    """
-    formatted_output = []
-
-    for idx, paper in enumerate(results, 1):
-        # Create the main list item with title and summary
-        title = paper.get("title", "Untitled")
-        authors = ", ".join(
-            [author.get("name", "") for author in paper.get("authors", [])]
-        )
-        summary = paper.get("summary", "").replace("\n", " ")
-
-        # Create details section
-        details = f"""
-- **Authors:** {authors}
-- **Published:** {paper.get('published', 'N/A')}
-- **Categories:** {', '.join(paper.get('categories', []))}
-- **Paper URL:** [{paper.get('entry_id', 'N/A')}]({paper.get('entry_id', '#')})
-- **PDF URL:** [{paper.get('pdf_url', 'N/A')}]({paper.get('pdf_url', '#')})
-
-**Abstract:**
-{summary}
-"""
-        # Combine the main list item with the details
-        formatted_item = f"{idx}. **{title}**\n{details}\n"
-        formatted_output.append(formatted_item)
-
-    return "\n".join(formatted_output)
 
 
 def handle_user_input():
@@ -124,15 +49,9 @@ def handle_user_input():
         # Show a spinner while waiting for API response
         with st.spinner(f"Processing with {st.session_state.mode.value}..."):
             # Get response from API based on current mode
-            arxiv_list_response = make_agent_api_call(st.session_state.mode, prompt)
+            formatted_response = make_agent_api_call(st.session_state.mode, prompt)
 
         # print(f"hello from response in st {arxiv_list_response}")
-
-        # Format the response if it's a list of arxiv results
-        if isinstance(arxiv_list_response, list) and arxiv_list_response:
-            formatted_response = format_arxiv_results(arxiv_list_response)
-        else:
-            formatted_response = str(arxiv_list_response)
 
         # Add assistant response to chat history
         st.session_state.messages.append(
