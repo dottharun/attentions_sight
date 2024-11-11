@@ -74,6 +74,34 @@ def handle_file_upload():
             st.rerun()
 
 
+def truncate_text(text: str, max_words: int = 1500) -> str:
+    """
+    Truncate text to a specified number of words while preserving sentence boundaries.
+
+    Args:
+        text (str): Input text to truncate
+        max_words (int): Maximum number of words to keep (default: 1500)
+
+    Returns:
+        str: Truncated text
+    """
+    # Split into words and get word count
+    words = text.split()
+
+    if len(words) <= max_words:
+        return text
+
+    # Join first max_words words
+    truncated = " ".join(words[:max_words])
+
+    # Try to end at a sentence boundary
+    last_period = truncated.rfind(".")
+    if last_period > 0:
+        truncated = truncated[: last_period + 1]
+
+    return truncated.strip()
+
+
 def handle_user_input():
     # Get the input prompt
     prompt = st.chat_input("What's on your mind?")
@@ -86,11 +114,15 @@ def handle_user_input():
             st.session_state.mode == AgentMode.FUTURE_ANALYSIS
             and st.session_state.pdf_text
         ):
+            # FIXME
+            # Truncate PDF text to manageable length
+            truncated_text = truncate_text(st.session_state.pdf_text)
+
             full_prompt = f"""
 Analysis Request: {prompt}
 
-Document Text:
-{st.session_state.pdf_text}
+Document Text (truncated to ~1500 words):
+{truncated_text}
 """
         else:
             full_prompt = prompt
