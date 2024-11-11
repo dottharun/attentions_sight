@@ -8,10 +8,10 @@ API_BASE_URL = "http://localhost:8000"  # Adjust this to match your FastAPI serv
 
 
 class AgentMode(Enum):
-    AUTO_AGENT = "Auto Agent"
+    AUTO_AGENT = "Auto Agent - WIP"
     WEB_SEARCH = "Web Search"
-    DB_QUERY = "DB Query"
-    QA_MODE = "QA Mode"
+    DB_QUERY = "DB Query - WIP"
+    QA_MODE = "QA Mode - WIP"
     FUTURE_ANALYSIS = "Future works/analysis"
 
 
