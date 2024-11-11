@@ -1,6 +1,7 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from contextlib import asynccontextmanager
+from agents.future_agent import llm_future_analysis
 from agents.search_agent import query_arxiv, llm_make_arxiv_query
 from util.log import logger
 
@@ -60,6 +61,27 @@ async def web_search(request: SearchRequest):
         results = await query_arxiv(search_query, max_results=request.max_results)
 
         return results
+
+    except HTTPException as he:
+        # Re-raise HTTP exceptions
+        raise he
+    except Exception as e:
+        logger.error(f"Error processing web search: {str(e)}")
+        raise HTTPException(
+            status_code=500, detail=f"Error processing web search: {str(e)}"
+        )
+
+
+@app.post("/api/future-analysis")
+async def future_analysis(request: SearchRequest):
+    """
+    Process the given research paper and given suggestions for future improvements, critic
+    """
+    try:
+        analysis = await llm_future_analysis(request.prompt)
+        logger.info(f"Generated analysis: {analysis}")
+
+        return analysis
 
     except HTTPException as he:
         # Re-raise HTTP exceptions

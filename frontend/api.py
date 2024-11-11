@@ -16,6 +16,9 @@ class AgentMode(Enum):
 
 
 def format_arxiv_results(results: List[dict]) -> str:
+    if len(results) == 0:
+        return "No results found in arxiv"
+
     """
     Format arxiv results into a nice markdown list with expandable details
     """
