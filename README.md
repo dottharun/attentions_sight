@@ -1,4 +1,4 @@
-# attentions_sight - attenions.ai assignment
+# attentions_sight - attentions.ai assignment
 - multiagentic research assistent
 
 # installed packages
@@ -8,6 +8,7 @@
 - langchain
 - langchain-groq
 - dotenv
+- pypdf2
 
 # how to setup?
 - `git clone <repo>`
